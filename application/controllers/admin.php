@@ -48,10 +48,15 @@ class Admin extends CI_Controller
 			if($true_key == $data["key"])
 			{
 				setcookie("auth", md5($true_key),time()+3600, "/");
+
+				$this->db->query("INSERT INTO `logs` (`ip`, `ua`, `created_at`, `result`) VALUES ('" . $_SERVER["REMOTE_ADDR"] . "', '" . $_SERVER["HTTP_USER_AGENT"] . "', " . time() . ", '1');");
+
 				redirect("admin");
 			}
 			else
 			{
+				$this->db->query("INSERT INTO `logs` (`ip`, `ua`, `created_at`, `result`) VALUES ('" . $_SERVER["REMOTE_ADDR"] . "', '" . $_SERVER["HTTP_USER_AGENT"] . "', " . time() . ", '0');");
+
 				$data["error"] = true;
 			}
 		}
@@ -78,6 +83,50 @@ class Admin extends CI_Controller
 
 		$this->load->view("admin/header", ["is_signin" => $this->is_signin]);
 		$this->load->view('admin/key');
+		$this->load->view("admin/footer");
+	}
+
+	public function log()
+	{
+		$this->checkAuth();
+
+		if(!$this->is_signin)
+		{
+			$this->redirect();
+		}
+
+		$config['base_url'] = base_url() . 'admin/log';
+		$config['total_rows'] = $this->db->get("logs")->num_rows();
+		$config['per_page'] = 1;
+		$config['full_tag_open'] = "<ul class='pagination'>";
+		$config['full_tag_close'] ="</ul>";
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$config['cur_tag_open'] = "<li class='disabled'><li class='active'><a href='#'>";
+		$config['cur_tag_close'] = "<span class='sr-only'></span></a></li>";
+		$config['next_tag_open'] = "<li>";
+		$config['next_tagl_close'] = "</li>";
+		$config['prev_tag_open'] = "<li>";
+		$config['prev_tagl_close'] = "</li>";
+		$config['first_tag_open'] = "<li>";
+		$config['first_tagl_close'] = "</li>";
+		$config['last_tag_open'] = "<li>";
+		$config['last_tagl_close'] = "</li>";
+
+		$this->pagination->initialize($config);
+
+		$offset = $this->uri->segment(3);
+		if($offset == null)
+		{
+			$offset = 0;
+		}
+		$limit = $config['per_page'];
+
+		$this->load->view("admin/header", ["is_signin" => $this->is_signin]);
+		$this->load->view('admin/log', [
+			"pager" => $this->pagination->create_links(),
+			"logs" => $this->db->query("SELECT ua, created_at, ip, result FROM logs ORDER BY id DESC LIMIT $offset,$limit")->result()
+		]);
 		$this->load->view("admin/footer");
 	}
 
