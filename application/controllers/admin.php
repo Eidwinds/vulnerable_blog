@@ -97,7 +97,7 @@ class Admin extends CI_Controller
 
 		$config['base_url'] = base_url() . 'admin/log';
 		$config['total_rows'] = $this->db->get("logs")->num_rows();
-		$config['per_page'] = 1;
+		$config['per_page'] = 20;
 		$config['full_tag_open'] = "<ul class='pagination'>";
 		$config['full_tag_close'] ="</ul>";
 		$config['num_tag_open'] = '<li>';
@@ -129,6 +129,107 @@ class Admin extends CI_Controller
 		]);
 		$this->load->view("admin/footer");
 	}
+
+	public function inquiry()
+	{
+		$this->checkAuth();
+
+		if(!$this->is_signin)
+		{
+			$this->redirect();
+		}
+
+		$config['base_url'] = base_url() . 'admin/inquiry';
+		$config['total_rows'] = $this->db->get("inquiries")->num_rows();
+		$config['per_page'] = 20;
+		$config['full_tag_open'] = "<ul class='pagination'>";
+		$config['full_tag_close'] ="</ul>";
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$config['cur_tag_open'] = "<li class='disabled'><li class='active'><a href='#'>";
+		$config['cur_tag_close'] = "<span class='sr-only'></span></a></li>";
+		$config['next_tag_open'] = "<li>";
+		$config['next_tagl_close'] = "</li>";
+		$config['prev_tag_open'] = "<li>";
+		$config['prev_tagl_close'] = "</li>";
+		$config['first_tag_open'] = "<li>";
+		$config['first_tagl_close'] = "</li>";
+		$config['last_tag_open'] = "<li>";
+		$config['last_tagl_close'] = "</li>";
+
+		$this->pagination->initialize($config);
+
+		$offset = $this->uri->segment(3);
+		if($offset == null)
+		{
+			$offset = 0;
+		}
+		$limit = $config['per_page'];
+
+		$this->load->view("admin/header", ["is_signin" => $this->is_signin]);
+		$this->load->view('admin/inquiry', [
+			"pager" => $this->pagination->create_links(),
+			"inquiries" => $this->db->query("SELECT id, name, email, body, created_at FROM inquiries ORDER BY id DESC LIMIT $offset,$limit")->result()
+		]);
+		$this->load->view("admin/footer");
+	}
+
+	public function blog()
+	{
+		$this->checkAuth();
+
+		if(!$this->is_signin)
+		{
+			$this->redirect();
+		}
+
+		$config['base_url'] = base_url() . 'admin/blog';
+		$config['total_rows'] = $this->db->get("blogs")->num_rows();
+		$config['per_page'] = 20;
+		$config['full_tag_open'] = "<ul class='pagination'>";
+		$config['full_tag_close'] ="</ul>";
+		$config['num_tag_open'] = '<li>';
+		$config['num_tag_close'] = '</li>';
+		$config['cur_tag_open'] = "<li class='disabled'><li class='active'><a href='#'>";
+		$config['cur_tag_close'] = "<span class='sr-only'></span></a></li>";
+		$config['next_tag_open'] = "<li>";
+		$config['next_tagl_close'] = "</li>";
+		$config['prev_tag_open'] = "<li>";
+		$config['prev_tagl_close'] = "</li>";
+		$config['first_tag_open'] = "<li>";
+		$config['first_tagl_close'] = "</li>";
+		$config['last_tag_open'] = "<li>";
+		$config['last_tagl_close'] = "</li>";
+
+		$this->pagination->initialize($config);
+
+		$offset = $this->uri->segment(3);
+		if($offset == null)
+		{
+			$offset = 0;
+		}
+		$limit = $config['per_page'];
+
+		$this->load->view("admin/header", ["is_signin" => $this->is_signin]);
+		$this->load->view('admin/blog', [
+			"pager" => $this->pagination->create_links(),
+			"blogs" => $this->db->query("SELECT * FROM blogs ORDER BY id DESC LIMIT $offset,$limit")->result()
+		]);
+		$this->load->view("admin/footer");
+	}
+
+	public function delinquiry()
+	{
+		$this->checkAuth();
+
+		$id = $this->uri->segment(3);
+		$this->db->query("DELETE FROM inquiries WHERE id = {$id}");
+
+		$this->load->view("admin/header", ["is_signin" => $this->is_signin]);
+		$this->load->view('admin/delinquiry');
+		$this->load->view("admin/footer");
+	}
+
 
 	public function logout()
 	{

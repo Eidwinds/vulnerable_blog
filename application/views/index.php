@@ -1,10 +1,16 @@
+<?php foreach($blogs as $blog): ?>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1><?= $blog->title; ?>(<?= date("Y/m/d H:i:s", $blog->created_at); ?>)</h1>
+				<p><?= nl2br($blog->body); ?></p>
+			</div>
+		</div>
+	</div>
+<?php endforeach; ?>
 <div class="container">
 	<div class="row">
-		<div class="col-lg-12">
-			<h1>ようこそ。みんなのブログへ()</h1>
-			<p>このホームページでは誰でもブログを投稿することができます。<br>
-				また投稿された記事は本人以外が削除することはできません！</p>
-		</div>
+<?= $pager; ?>
 	</div>
 </div>
 <div class="container">
